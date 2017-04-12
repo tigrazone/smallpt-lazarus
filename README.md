@@ -4,11 +4,10 @@ This is a Lazarus Pascal version of well-known 99-lines-of-code c++ path tracer 
 Turbo Pascal 3/Lazarus port originally writen by Dirk de la Hunt http://www.iwasdeportedandalligotwasthislousydomain.co.uk/static.php?page=smallpt_tp
 
 My version are little optimized - precalculated values, arithmetic simplifications, remove normalization if it not needed.
-15% of speedups
 
 Original version by Dirk de la Hunt render 1024x768 image at 16 spp with 4 threads in 68s
 
-My version 59s
+My version 59s - 15% of speedup
 
 Compiling to x86_64 platform gives more speed!
 I compared with MinGW gcc c++ version - it completed in 48s - 15% faster then compiled by Lazarus, but compared with Visual Studio Compiler(69s) or Intel C++ compiler result must be an approximately similar
