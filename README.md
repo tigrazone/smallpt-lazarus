@@ -6,7 +6,8 @@ Turbo Pascal 3/Lazarus port originally writen by Dirk de la Hunt http://www.iwas
 My version are little optimized - precalculated values, arithmetic simplifications, remove normalization if it not needed.
 15% of speedups
 
-Original version 1024x768 at 16 spp with 4 threads 68s
+Original version by Dirk de la Hunt render 1024x768 image at 16 spp with 4 threads in 68s
+
 My version 59s
 
 Compiling to x86_64 platform gives more speed!
