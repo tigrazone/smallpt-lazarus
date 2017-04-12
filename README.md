@@ -1,6 +1,7 @@
 # smallpt-lazarus
 This is a Lazarus Pascal version of well-known 99-lines-of-code c++ path tracer smallpt by Kevin Beason http://www.kevinbeason.com/smallpt/
-Originally writen by Dirk de la Hunt http://www.iwasdeportedandalligotwasthislousydomain.co.uk/static.php?page=smallpt_tp
+
+Turbo Pascal 3/Lazarus port originally writen by Dirk de la Hunt http://www.iwasdeportedandalligotwasthislousydomain.co.uk/static.php?page=smallpt_tp
 
 My version are little optimized - precalculated values, arithmetic simplifications, remove normalization if it not needed.
 15% of speedups
