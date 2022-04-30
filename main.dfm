@@ -12,7 +12,7 @@ object mainform: Tmainform
   Font.Name = 'MS Sans Serif'
   OnClose = FormClose
   OnCreate = FormCreate
-  LCLVersion = '1.6.4.0'
+  LCLVersion = '2.1.0.0'
   object imgRender: TImage
     Left = 160
     Height = 188
@@ -93,7 +93,7 @@ object mainform: Tmainform
     Top = 80
     Width = 48
     TabOrder = 2
-    Text = '4'
+    Text = '8'
   end
   object strSampleCount: TEdit
     Left = 104
@@ -121,14 +121,14 @@ object mainform: Tmainform
   end
   object sd: TSaveDialog
     Filter = 'Bitmap files (*.BMP)|*.bmp'
-    left = 13
-    top = 111
+    Left = 13
+    Top = 111
   end
   object tmr_update: TTimer
     Enabled = False
     Interval = 200
     OnTimer = tmr_updateTimer
-    left = 176
-    top = 104
+    Left = 176
+    Top = 104
   end
 end
