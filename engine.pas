@@ -1,7 +1,10 @@
 UNIT Engine;
 
 INTERFACE
-
+{$IFDEF SSE}
+  {$CODEALIGN LOCALMIN=16}
+  {$CODEALIGN VARMIN=16}
+{$ENDIF}
 USES
   Utils, Sphere, Vector, Ray, common, classes;
 

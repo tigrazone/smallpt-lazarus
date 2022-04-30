@@ -5,6 +5,9 @@ INTERFACE
 USES
   Vector;
 
+{$IFDEF SSE}
+  {$CODEALIGN RECORDMIN=16}
+{$ENDIF}
 TYPE
   TRay = RECORD
     Origin    : TVector;

@@ -64,6 +64,7 @@ BEGIN
   Utils_kahanSum3 := sum;
 END;
 
+// This function doesn't do anything useful except summation
 FUNCTION Utils_kahanSum(a, b : FloatType) : FloatType;
 VAR
   sum : FloatType;

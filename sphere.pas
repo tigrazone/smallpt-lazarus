@@ -1,7 +1,12 @@
 UNIT Sphere;
 
 INTERFACE
-
+{$IFDEF SSE}
+  {$CODEALIGN LOCALMIN=16}
+  {$CODEALIGN VARMIN=16}
+  {$CODEALIGN RECORDMIN=16}
+  {$ALIGN 16}
+{$ENDIF}
 USES
   Utils, Vector, Ray;
 
@@ -13,11 +18,11 @@ CONST
 TYPE
   TSphere = CLASS
   PUBLIC
-    Radius, r2  : FloatType;
+    SurfaceType : INTEGER;
     Position    : TVector;
     Emission    : TVector;
     Colour      : TVector;
-    SurfaceType : INTEGER;
+    Radius, r2  : FloatType;
   PUBLIC
     CONSTRUCTOR Create(Radius : FloatType; Position, Emission, Colour : TVector; SurfaceType : INTEGER);
     FUNCTION Intersect(VAR Ray : TRay) : FloatType;
