@@ -19,6 +19,8 @@ TYPE
 
   { TfrmMain }
 
+  { Tmainform }
+
   Tmainform = CLASS(TForm)
     cmdSave : TButton;
     cmdRender : TButton;
@@ -61,24 +63,9 @@ IMPLEMENTATION
 USES
   utils;
 
-FUNCTION SecToTime(Sec : INTEGER) : STRING;
-VAR
-  H, M, S : STRING;
-  ZH, ZM, ZS : INTEGER;
+FUNCTION MSecToTime(MSec:INTEGER):STRING;
 BEGIN
-  ZH := Sec DIV 3600;
-  ZM := Sec DIV 60 - ZH * 60;
-  ZS := Sec - (ZH * 3600 + ZM * 60);
-  H := IntToStr(ZH);
-  IF (H = '0') THEN
-    H := '00';
-  M := IntToStr(ZM);
-  IF (M = '0') THEN
-    M := '00';
-  S := IntToStr(ZS);
-  IF (S = '0') THEN
-    S := '00';
-  Result := H + ':' + M + ':' + S;
+  Result:=Format('%d:%.2d.%.3d',[MSec div 60000,(MSec div 1000) mod 60,MSec mod 1000]);
 END;
 
     {$IFDEF FPC}
@@ -96,7 +83,7 @@ BEGIN
 
   //imgRender.picture.bitmap.EndUpdate();
 
-  lblTime.Caption := 'Time Taken: ' + SecToTime((GetTickCount - startTime) DIV 1000);
+  lblTime.Caption := 'Time Taken: ' + MSecToTime((GetTickCount - startTime));
 
   Message.Result := 0;
   INHERITED;
