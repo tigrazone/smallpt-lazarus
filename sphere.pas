@@ -46,7 +46,6 @@ VAR
   eps : FloatType;
   b   : FloatType;
   det : FloatType;
-  t   : FloatType;
 BEGIN
   Result := 0;
 

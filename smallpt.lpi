@@ -98,9 +98,6 @@
     <Other>
       <CustomOptions Value="-CfSSE3
 -dSSE"/>
-      <OtherDefines Count="1">
-        <Define0 Value="SSE"/>
-      </OtherDefines>
     </Other>
   </CompilerOptions>
   <Debugging>

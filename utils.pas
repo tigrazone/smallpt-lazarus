@@ -37,7 +37,6 @@ CONST
   sErandType8   : integer  = (sizeof(ErandType) * 8);
 
 VAR
-  _rand48_seed : ARRAY[0..2] OF ErandType;
   _rand48_mult : ARRAY[0..2] OF ErandType;
   _rand48_add  : ErandType;
 
@@ -140,10 +139,6 @@ BEGIN
 END;
 
 BEGIN
-  _rand48_seed[0] := RAND48_SEED_0;
-  _rand48_seed[1] := RAND48_SEED_1;
-  _rand48_seed[2] := RAND48_SEED_2;
-
   _rand48_mult[0] := RAND48_MULT_0;
   _rand48_mult[1] := RAND48_MULT_1;
   _rand48_mult[2] := RAND48_MULT_2;

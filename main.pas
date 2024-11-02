@@ -40,7 +40,6 @@ TYPE
     PROCEDURE cmdSaveClick(Sender : TObject);
     PROCEDURE FormClose(Sender: TObject; VAR CloseAction: TCloseAction);
     PROCEDURE FormCreate(Sender : TObject);
-    procedure tmr_updateTimer(Sender: TObject);
   PRIVATE
     { Private declarations }
     engine : TEngine;
@@ -121,19 +120,6 @@ BEGIN
   DoubleBuffered := TRUE;
   Left           := 10;
   Top            := 10;
-
-  //settings_frm.UpdRateComboChange(sender);
 END;
-
-procedure Tmainform.tmr_updateTimer(Sender: TObject);
-Var
- I: Integer;
- P: TPoint;
- Q: Int64;
- c,c_mx,c_mn: string;
- s,sps,m,k,k_mx,m_mx,k_mn,m_mn,s_mx,s_mn: double;
-begin
-
-end;
 
 END.

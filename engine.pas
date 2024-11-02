@@ -104,7 +104,7 @@ VAR
   nl       : TVector;
   f        : TVector;
   p        : FloatType;
-  lll, m1  : FloatType;
+  m1       : FloatType;
 
   r1       : FloatType;
   r2       : FloatType;
@@ -135,7 +135,6 @@ VAR
   RP       : FloatType;
   TP       : FloatType;
   tdir     : TVector;
-  mult     : FloatType;
   foo      : TVector;
 
   cl       : TVector;

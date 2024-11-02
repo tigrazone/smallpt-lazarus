@@ -12,7 +12,7 @@ object mainform: Tmainform
   Font.Name = 'MS Sans Serif'
   OnClose = FormClose
   OnCreate = FormCreate
-  LCLVersion = '2.1.0.0'
+  LCLVersion = '3.6.0.0'
   object imgRender: TImage
     Left = 160
     Height = 188
@@ -75,8 +75,8 @@ object mainform: Tmainform
     Top = 112
     Width = 75
     Caption = '&Render'
-    OnClick = cmdRenderClick
     TabOrder = 0
+    OnClick = cmdRenderClick
   end
   object cmdSave: TButton
     Left = 77
@@ -84,8 +84,8 @@ object mainform: Tmainform
     Top = 168
     Width = 75
     Caption = '&Save Image'
-    OnClick = cmdSaveClick
     TabOrder = 1
+    OnClick = cmdSaveClick
   end
   object strThreadCount: TEdit
     Left = 104
@@ -127,7 +127,6 @@ object mainform: Tmainform
   object tmr_update: TTimer
     Enabled = False
     Interval = 200
-    OnTimer = tmr_updateTimer
     Left = 176
     Top = 104
   end
