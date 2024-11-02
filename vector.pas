@@ -12,9 +12,6 @@ TYPE
     x : FloatType;
     y : FloatType;
     z : FloatType;
-    {$IFDEF SSE}
-//    t : FloatType;
-    {$ENDIF}
   END;
 
 FUNCTION Vector_Init(x, y, z : FloatType) : TVector;
@@ -37,9 +34,6 @@ BEGIN
   Result.x := x;
   Result.y := y;
   Result.z := z;
-  {$IFDEF SSE}
-//  Result.t := 0;
-  {$ENDIF}
 END;
 
 PROCEDURE Vector_Add(VAR Result : TVector; a, b : TVector);
@@ -130,7 +124,7 @@ VAR
   m, m1 : FloatType;
 BEGIN
   m := sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-  IF (m = 0) THEN
+  IF isZERO(m) THEN
   BEGIN
     Result.x := 0;
     Result.y := 0;

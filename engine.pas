@@ -26,7 +26,7 @@ TYPE
     PROCEDURE radiance(VAR Result : TVector; Ray : TRay; Depth : INTEGER; VAR Xi : ErandArray);
     PROCEDURE threadDone(Sender : TObject);
   PUBLIC
-    CONSTRUCTOR Create;
+    CONSTRUCTOR Create(sceneId: integer);
     DESTRUCTOR Destroy; OVERRIDE;
 
     PROCEDURE Render(ReportTo : THandle; Width, Height, SampleCount, MaxThreads : INTEGER);
@@ -35,7 +35,7 @@ TYPE
 
 IMPLEMENTATION
 
-USES sysutils, windows, math;
+USES main, sysutils, windows, math;
 
 TYPE
   TRenderThread = CLASS(TThread)
@@ -84,7 +84,7 @@ BEGIN
   BEGIN
     sphere := TSphere(spheres[index]);
     d      := sphere.Intersect(Ray);
-    IF (d <> 0) AND (d < Distance) THEN
+    IF (d > 0) AND (d < Distance) THEN
     BEGIN
       Distance := d;
       Id       := index;
@@ -186,7 +186,7 @@ BEGIN
     Vector_Add(cl, cl, clTemp);
 
     Depth := Depth + 1;
-    IF (Depth > 5) OR (p = 0) THEN
+    IF (Depth > 5) OR isZERO(p) THEN
       IF (Utils_erand48(Xi) < p) THEN
       BEGIN
         Vector_MultiplyFloat(f, f, 1 / p);
@@ -212,82 +212,42 @@ BEGIN
 
       IF (Utils_fabs(w.x) > 0.1) THEN
         begin
-             //u := Vector_Init(0, 1, 0);
-             {
-			 lll:=w.z*w.z+w.x*w.x;
-			 lll:=sqrt(lll);
-			 }
-			 m1 := 1/sqrt(w.z*w.z+w.x*w.x);
-			 
-			 {
-			 u.x := u.x * m1;
-			 u.z := u.z * m1;
-			 }
-			 
-			 u := Vector_Init(w.z*m1, 0, -w.x*m1);
-	
-	v := Vector_Init(w.y*u.z, w.z*u.x-w.x*u.z, -w.y*u.x); //4* vs 6*
+			 m1 := 1 / sqrt(w.z * w.z + w.x * w.x);
+			 u := Vector_Init(w.z * m1, 0, -w.x * m1);
+			 v := Vector_Init(w.y * u.z, w.z *u.x - w.x * u.z, -w.y * u.x); //4* vs 6*
         end
       ELSE
       begin
-        //u := Vector_Init(1, 0, 0);
-	{
-			 lll:=w.z*w.z+w.y*w.y;
-			 lll:=sqrt(lll);
-			 }
-			 m1 := 1/sqrt(w.z*w.z+w.y*w.y);
-			 {
-    u.y := u.y * m1;
-    u.z := u.z * m1;
-			}
-	
-        u := Vector_Init(0, -w.z*m1, w.y*m1);
-	
-	v := Vector_Init(w.y*u.z-w.z*u.y, -w.x*u.z, w.x*u.y); //4* vs 6*
-
-	//4* 1/ 1sqrt
+			 m1 := 1 / sqrt(w.z * w.z + w.y * w.y);
+			 u := Vector_Init(0, -w.z * m1, w.y * m1);
+			 v := Vector_Init(w.y * u.z - w.z * u.y, -w.x * u.z, w.x * u.y); //4* vs 6*
       end;
 
-      //Vector_Cross(u, u, w);  //6*
-      //Vector_Normalise(u, u); //6* 1sqrt 1/
-
-      //Vector_Cross(v, w, u);  //6*
-
-
-      sincos(r1,ss,cc);
+      sincos(r1, ss, cc);
 
       Vector_MultiplyFloat(u, u, cc * r2s); //4* cos
       Vector_MultiplyFloat(v, v, ss * r2s); //4* sin
-
-      {
-      Vector_MultiplyFloat(u, u, cos(r1) * r2s); //4* cos
-      Vector_MultiplyFloat(v, v, sin(r1) * r2s); //4* sin
-      }
       Vector_MultiplyFloat(w, w, sqrt(1 - r2));  //3* sqrt
 
       Vector_Add3(d, u, v, w);
 
-      //Vector_Normalise(d, d);
       Ray_Init(r, x, d);
-      continue; //Skip_Rest := TRUE;
+      continue;
     END ELSE
     IF (sphere.SurfaceType = SurfaceType_Specular) THEN
     BEGIN
       newRay.Origin := x;
-      //Vector_MultiplyFloat(newRay.Direction, n, 2);
 
       Vector_Add(newRay.Direction, n, n);
 
       Vector_MultiplyFloat(newRay.Direction, newRay.Direction, dot_n_dir);
       Vector_Sub(newRay.Direction, r.Direction, newRay.Direction);
       r := newRay;
-      continue; //skipRest := TRUE;
+      continue;
     END;
 
-    //IF (NOT skipRest) THEN
     BEGIN
       newRay.Origin := x;
-      //Vector_MultiplyFloat(newRay.Direction, n, 2);
 
       Vector_Add(newRay.Direction, n, n);
 
@@ -299,24 +259,20 @@ BEGIN
       IF (into) THEN
       BEGIN
         nnt  := nc / nt;
-        //mult := 1.0;
       END ELSE
       BEGIN
         nnt  := nt / nc;
-        //mult := -1.0;
       END;
       ddn   := Vector_Dot(r.Direction, nl);
       cos2t := 1 - nnt * nnt * (1 - ddn * ddn);
       IF (cos2t < 0) THEN
       BEGIN
         r := newRay;
-        continue; //skipRest := TRUE;
+        continue;
       END;
 
-      //IF (NOT skipRest) THEN
       BEGIN
 		tdirr:=false;
-        //Vector_Normalise(tdir, tdir);
         a := nt - nc;
         b := nt + nc;
         R0 := a * a / (b * b);
@@ -324,21 +280,19 @@ BEGIN
           c := 1 + ddn
         ELSE
           begin
-		  
-	  
-        Vector_MultiplyFloat(foo, n,  (ddn * nnt + sqrt(cos2t)));
-		if not into then
-		begin
-			foo.x:=-foo.x;
-			foo.y:=-foo.y;
-			foo.Z:=-foo.z;
-		end;
-		
-        Vector_MultiplyFloat(tdir, r.Direction, nnt);
-        Vector_Sub(tdir, tdir, foo);
-		  c := 1 - Vector_Dot(tdir, n);
-		  tdirr:=true;
-		 end;
+				Vector_MultiplyFloat(foo, n, (ddn * nnt + sqrt(cos2t)));
+				if not into then
+				begin
+					foo.x:=-foo.x;
+					foo.y:=-foo.y;
+					foo.Z:=-foo.z;
+				end;
+
+				Vector_MultiplyFloat(tdir, r.Direction, nnt);
+				Vector_Sub(tdir, tdir, foo);
+				c := 1 - Vector_Dot(tdir, n);
+				tdirr:=true;
+          end;
 
         Re := R0 + (1 - R0) * c * c * c * c * c;
         Tr := 1 - Re;
@@ -346,82 +300,64 @@ BEGIN
 
         IF (Utils_erand48(Xi) < p) THEN
         BEGIN
-        RP := Re / P;
-          Vector_MultiplyFloat(cf, cf, RP);
-          r := newRay;
+			RP := Re / P;
+			Vector_MultiplyFloat(cf, cf, RP);
+			r := newRay;
         END ELSE
         BEGIN
-        TP := Tr / (1 - P);
+			TP := Tr / (1 - P);
+
+			if not tdirr then
+			begin
+				Vector_MultiplyFloat(foo, n, (ddn * nnt + sqrt(cos2t)));
+				if not into then
+				begin
+					foo.x:=-foo.x;
+					foo.y:=-foo.y;
+					foo.Z:=-foo.z;
+				end;
+
+				Vector_MultiplyFloat(tdir, r.Direction, nnt);
+				Vector_Sub(tdir, tdir, foo);
+			end;
 		
-		
-		if not tdirr then  
-		begin
-        Vector_MultiplyFloat(foo, n,  (ddn * nnt + sqrt(cos2t)));
-		if not into then
-		begin
-			foo.x:=-foo.x;
-			foo.y:=-foo.y;
-			foo.Z:=-foo.z;
-		end;
-		
-        Vector_MultiplyFloat(tdir, r.Direction, nnt);
-        Vector_Sub(tdir, tdir, foo);
-		end;
-		
-          Vector_MultiplyFloat(cf, cf, TP);
-          Ray_Init(r, x, tdir);
+			Vector_MultiplyFloat(cf, cf, TP);
+			Ray_Init(r, x, tdir);
         END;
       END;
     END;
   END;
 END;
 
-CONSTRUCTOR TEngine.Create;
+CONSTRUCTOR TEngine.Create(sceneId: integer);
 BEGIN
   spheres := TList.Create;
   threads := TList.Create;
 
-  {
-
-
-Sphere spheres[] = {//Scene: radius, position, emission, color, material
-  Sphere(1e5, Vec( 1e5+1,40.8,81.6), Vec(),Vec(.75,.25,.25),DIFF),//Left
-  Sphere(1e5, Vec(-1e5+99,40.8,81.6),Vec(),Vec(.25,.25,.75),DIFF),//Rght
-  Sphere(1e5, Vec(50,40.8, 1e5),     Vec(),Vec(.75,.75,.75),DIFF),//Back
-  Sphere(1e5, Vec(50,40.8,-1e5+170), Vec(),Vec(),           DIFF),//Frnt
-  Sphere(1e5, Vec(50, 1e5, 81.6),    Vec(),Vec(.75,.75,.75),DIFF),//Botm
-  Sphere(1e5, Vec(50,-1e5+81.6,81.6),Vec(),Vec(.75,.75,.75),DIFF),//Top
-  Sphere(16.5,Vec(27,16.5,47),       Vec(),Vec(1,1,1)*.999, SPEC),//Mirr
-  Sphere(16.5,Vec(73,16.5,78),       Vec(),Vec(1,1,1)*.999, REFR),//Glas
-  Sphere(1.5, Vec(50,81.6-16.5,81.6),Vec(4,4,4)*100,  Vec(), DIFF),//Lite
-}
-
-// большой источник света
-  
-  spheres.Add(TSphere.Create(1e5, Vector_Init(1e5 + 1.0, 40.8, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.25, 0.25), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(-1e5 + 99, 40.8, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.25, 0.25, 0.75), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 40.8, 1e5), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 40.8, -1e5 + 170), Vector_Init(0, 0, 0), Vector_Init(0, 0, 0), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 1e5, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(50, -1e5 + 81.6, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(16.5, Vector_Init(27, 16.5, 47), Vector_Init(0, 0, 0), Vector_Init(1, 1, 1), SurfaceType_Specular));
-  spheres.Add(TSphere.Create(16.5, Vector_Init(73, 16.5, 78), Vector_Init(0, 0, 0), Vector_Init(0.999, 0.999, 0.999), SurfaceType_Refractive));
-  spheres.Add(TSphere.Create(600, Vector_Init(50, 681.6 - 0.27, 81.6), Vector_Init(12, 12, 12), Vector_Init(0, 0, 0), SurfaceType_Diffuse));
-  
-
-  {
-  // мелкий источник света - тяжелее попасть и долго просчитывает но сходимость херовая всё равно. на explicit должно быть быстрее
-  // дописать также importance+direct, ptmnee
-  spheres.Add(TSphere.Create(1e5, Vector_Init(1e5 + 1.0, 40.8, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.25, 0.25), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(-1e5 + 99.0, 40.8, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.25, 0.25, 0.25), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 40.8, 1e5), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 40.8, -1e5 + 170.0), Vector_Init(0, 0, 0), Vector_Init(0, 0, 0), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 1e5, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(1e5, Vector_Init(50, -1e5 + 81.6, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
-  spheres.Add(TSphere.Create(16.5, Vector_Init(27, 16.5, 47), Vector_Init(0, 0, 0), Vector_Init(0.999, 0.999, 0.999), SurfaceType_Specular));
-  spheres.Add(TSphere.Create(16.5, Vector_Init(73, 16.5, 78), Vector_Init(0, 0, 0), Vector_Init(0.999, 0.999, 0.999), SurfaceType_Refractive));
-  spheres.Add(TSphere.Create(1.5, Vector_Init(50, 81.6-16.5, 81.6), Vector_Init(400, 400, 400), Vector_Init(0, 0, 0), SurfaceType_Diffuse));
-}
+	// big light source
+	if sceneId = 0 then begin
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(1e5 + 1.0, 40.8, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.25, 0.25), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(-1e5 + 99, 40.8, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.25, 0.25, 0.75), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 40.8, 1e5), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 40.8, -1e5 + 170), Vector_Init(0, 0, 0), Vector_Init(0, 0, 0), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 1e5, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(50, -1e5 + 81.6, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(16.5, Vector_Init(27, 16.5, 47), Vector_Init(0, 0, 0), Vector_Init(1, 1, 1), SurfaceType_Specular));
+	  spheres.Add(TSphere.Create(16.5, Vector_Init(73, 16.5, 78), Vector_Init(0, 0, 0), Vector_Init(0.999, 0.999, 0.999), SurfaceType_Refractive));
+	  spheres.Add(TSphere.Create(600, Vector_Init(50, 681.6 - 0.27, 81.6), Vector_Init(12, 12, 12), Vector_Init(0, 0, 0), SurfaceType_Diffuse));
+	END else
+	if sceneId = 1 then begin  
+	// small light source - hard to calculate
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(1e5 + 1.0, 40.8, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.25, 0.25), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(-1e5 + 99.0, 40.8, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.25, 0.25, 0.25), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 40.8, 1e5), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 40.8, -1e5 + 170.0), Vector_Init(0, 0, 0), Vector_Init(0, 0, 0), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(50, 1e5, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(1e5, Vector_Init(50, -1e5 + 81.6, 81.6), Vector_Init(0, 0, 0), Vector_Init(0.75, 0.75, 0.75), SurfaceType_Diffuse));
+	  spheres.Add(TSphere.Create(16.5, Vector_Init(27, 16.5, 47), Vector_Init(0, 0, 0), Vector_Init(0.999, 0.999, 0.999), SurfaceType_Specular));
+	  spheres.Add(TSphere.Create(16.5, Vector_Init(73, 16.5, 78), Vector_Init(0, 0, 0), Vector_Init(0.999, 0.999, 0.999), SurfaceType_Refractive));
+	  spheres.Add(TSphere.Create(1.5, Vector_Init(50, 81.6-16.5, 81.6), Vector_Init(400, 400, 400), Vector_Init(0, 0, 0), SurfaceType_Diffuse));
+	END;
 END;
 
 DESTRUCTOR TEngine.Destroy;
@@ -458,6 +394,12 @@ BEGIN
     thread := TRenderThread.Create(self, ReportTo, pictureWidth, pictureHeight, tileX * Tile_Width, tileY * Tile_Height, tileX * Tile_Width + Tile_Width, tileY * Tile_Height + Tile_Height);
     thread.OnTerminate := threadDone;
     thread.Resume;
+  END
+  ELSE BEGIN //all done
+    mainform.sceneSelector1.enabled := true;
+    mainform.cmdRender.enabled := true;
+    mainform.cmdSave.enabled := true;
+    mainform.StopRenderBtn.enabled := false;
   END;
 
   tileX := tileX + 1;
@@ -519,6 +461,9 @@ VAR
   temp         : TVector;
   r1           : FloatType;
   r2           : FloatType;
+  
+  w_, h_       : FloatType;
+  
   d            : TVector;
   dx           : FloatType;
   dy           : FloatType;
@@ -536,6 +481,9 @@ BEGIN
   w     := width;
   h     := height;
   samps := samplecount div 4;
+  
+  w_    := 1.0 / w;
+  h_    := 1.0 / h;
 
   FOR y := 0 TO Tile_Height - 1 DO
   BEGIN
@@ -548,7 +496,7 @@ BEGIN
   camDirection := Vector_Init(0, -0.042612, -1);
   Vector_Normalise(camDirection, camDirection);
   Ray_Init(cam, camPosition, camDirection);
-  cx := Vector_Init(w * 0.5135 / h, 0, 0);
+  cx := Vector_Init(w * 0.5135 * h_, 0, 0);
   Vector_Cross(cy, cx, cam.Direction);
   Vector_Normalise(cy, cy);
   Vector_MultiplyFloat(cy, cy, 0.5135);
@@ -596,8 +544,8 @@ BEGIN
                 ELSE
                   dy := 1 - sqrt(2 - r2);
 
-                Vector_MultiplyFloat(temp, cx, ((sx + 0.5 + dx) / 2 + x) / w - 0.5);
-                Vector_MultiplyFloat(d, cy, ((sy + 0.5 + dy) / 2 + (h - y - 1)) / h - 0.5);
+                Vector_MultiplyFloat(temp, cx, ((sx + 0.5 + dx) * 0.5 + x) * w_ - 0.5);
+                Vector_MultiplyFloat(d, cy, ((sy + 0.5 + dy) * 0.5 + (h - y - 1)) * h_ - 0.5);
                 Vector_Add(d, d, temp);
                 Vector_Add(d, d, cam.Direction);
 

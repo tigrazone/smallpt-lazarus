@@ -6,16 +6,18 @@ CONST
   M_PI = 3.14159265358979323846;
   M_PI2 = M_PI + M_PI;
   gamma2_2 = 1.0 / 2.2;
+  NEARzero = 1.0e-15;
 
 TYPE
   FloatType  = DOUBLE;
   ErandType  = WORD;
   ERandArray = ARRAY[0..3] OF ErandType;
 
+FUNCTION isZERO(a : FloatType) : boolean; INLINE;
 FUNCTION Utils_fabs(value : FloatType) : FloatType;
 FUNCTION Utils_clamp(value : FloatType) : FloatType;
-FUNCTION Utils_toInt(value : FloatType) : INTEGER;
-FUNCTION Utils_power(Number, Exponent : FloatType) : FloatType;
+FUNCTION Utils_toInt(value : FloatType) : INTEGER; INLINE;
+FUNCTION Utils_power(Number, Exponent : FloatType) : FloatType; INLINE;
 FUNCTION Utils_erand48(VAR xseed : ERandArray) : FloatType;
 FUNCTION Utils_kahanSum(a, b : FloatType) : FloatType;
 FUNCTION Utils_kahanSum3(a, b, c : FloatType) : FloatType;
@@ -26,9 +28,6 @@ USES
   math;
 
 CONST
-  RAND48_SEED_0 : ErandType = ($330e);
-  RAND48_SEED_1 : ErandType = ($abcd);
-  RAND48_SEED_2 : ErandType = ($1234);
   RAND48_MULT_0 : ErandType = ($e66d);
   RAND48_MULT_1 : ErandType = ($deec);
   RAND48_MULT_2 : ErandType = ($0005);
@@ -39,6 +38,11 @@ CONST
 VAR
   _rand48_mult : ARRAY[0..2] OF ErandType;
   _rand48_add  : ErandType;
+
+FUNCTION isZERO(a : FloatType) : boolean; INLINE;
+BEGIN
+  result := (a > -NEARzero) AND (a < NEARzero);
+END;
 
 FUNCTION Utils_kahanSum3(a, b, c : FloatType) : FloatType;
 VAR
@@ -125,15 +129,15 @@ BEGIN
     Utils_clamp := value;
 END;
 
-FUNCTION Utils_power(Number, Exponent : FloatType) : FloatType;
+FUNCTION Utils_power(Number, Exponent : FloatType) : FloatType; INLINE;
 BEGIN
-  IF (Number = 0) OR (Exponent = 0) THEN
+  IF isZERO(Number) OR isZERO(Exponent) THEN
     Utils_power := 0
   ELSE
     Utils_power := Exp(Exponent * Ln(Number));
 END;
 
-FUNCTION Utils_toInt(value : FloatType) : INTEGER;
+FUNCTION Utils_toInt(value : FloatType) : INTEGER; INLINE;
 BEGIN
   Utils_toInt := round(Utils_power(Utils_clamp(value), gamma2_2) * 255.0 + 0.5);
 END;

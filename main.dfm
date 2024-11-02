@@ -1,10 +1,10 @@
 object mainform: Tmainform
   Left = 344
-  Height = 202
+  Height = 277
   Top = 302
   Width = 366
   Caption = 'smallpt'
-  ClientHeight = 202
+  ClientHeight = 277
   ClientWidth = 366
   Color = clBtnFace
   Font.Color = clWindowText
@@ -20,11 +20,11 @@ object mainform: Tmainform
     Width = 184
   end
   object lblTime: TLabel
-    Left = 17
+    Left = 8
     Height = 13
-    Top = 144
-    Width = 60
-    Caption = 'Time Taken:'
+    Top = 130
+    Width = 3
+    Caption = ' '
     Color = clBtnFace
     ParentColor = False
     Transparent = False
@@ -70,20 +70,21 @@ object mainform: Tmainform
     Transparent = False
   end
   object cmdRender: TButton
-    Left = 77
+    Left = 8
     Height = 25
-    Top = 112
-    Width = 75
+    Top = 148
+    Width = 56
     Caption = '&Render'
     TabOrder = 0
     OnClick = cmdRenderClick
   end
   object cmdSave: TButton
-    Left = 77
+    Left = 80
     Height = 25
-    Top = 168
+    Top = 148
     Width = 75
     Caption = '&Save Image'
+    Enabled = False
     TabOrder = 1
     OnClick = cmdSaveClick
   end
@@ -119,15 +120,47 @@ object mainform: Tmainform
     TabOrder = 5
     Text = '768'
   end
+  object Label5: TLabel
+    Left = 8
+    Height = 13
+    Top = 106
+    Width = 31
+    Caption = 'Scene'
+  end
+  object SceneSelector1: TComboBox
+    Left = 72
+    Height = 21
+    Top = 104
+    Width = 80
+    ItemHeight = 13
+    ItemIndex = 0
+    Items.Strings = (
+      'Big light'
+      'Small light'
+    )
+    ReadOnly = True
+    TabOrder = 6
+    Text = 'Big light'
+  end
+  object StopRenderBtn: TButton
+    Left = 8
+    Height = 25
+    Top = 176
+    Width = 144
+    Caption = 'Stop render'
+    Enabled = False
+    TabOrder = 7
+    OnClick = StopRenderBtnClick
+  end
   object sd: TSaveDialog
     Filter = 'Bitmap files (*.BMP)|*.bmp'
-    Left = 13
-    Top = 111
+    Left = 168
+    Top = 16
   end
   object tmr_update: TTimer
     Enabled = False
     Interval = 200
-    Left = 176
-    Top = 104
+    Left = 200
+    Top = 16
   end
 end

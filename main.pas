@@ -22,12 +22,15 @@ TYPE
   { Tmainform }
 
   Tmainform = CLASS(TForm)
+    StopRenderBtn: TButton;
     cmdSave : TButton;
     cmdRender : TButton;
+    SceneSelector1: TComboBox;
     Label1 : TLabel;
     Label2 : TLabel;
     Label3 : TLabel;
     Label4 : TLabel;
+    Label5: TLabel;
     sd : TSaveDialog;
     strWidth : TEdit;
     strHeight : TEdit;
@@ -40,6 +43,7 @@ TYPE
     PROCEDURE cmdSaveClick(Sender : TObject);
     PROCEDURE FormClose(Sender: TObject; VAR CloseAction: TCloseAction);
     PROCEDURE FormCreate(Sender : TObject);
+    procedure StopRenderBtnClick(Sender: TObject);
   PRIVATE
     { Private declarations }
     engine : TEngine;
@@ -75,14 +79,10 @@ VAR
 BEGIN
   LNewLine := Pointer(Message.LParam);
 
-  //imgRender.picture.bitmap.BeginUpdate(true);
-
   FOR i := 0 TO LNewLine^.width - 1 DO
     imgRender.Canvas.Pixels[LNewLine^.x + i, LNewLine^.y] := (Utils_toInt(LNewLine^.line[i].x)) + (Utils_toInt(LNewLine^.line[i].y) SHL 8) + (Utils_toInt(LNewLine^.line[i].z) SHL 16);
 
-  //imgRender.picture.bitmap.EndUpdate();
-
-  lblTime.Caption := 'Time Taken: ' + MSecToTime((GetTickCount - startTime));
+  lblTime.Caption := 'Rendering time: ' + MSecToTime((GetTickCount - startTime));
 
   Message.Result := 0;
   INHERITED;
@@ -100,7 +100,11 @@ BEGIN
   ClientWidth := imgRender.Left + 5 + imgRender.Width;
   ClientHeight := imgRender.Top + 5 + imgRender.Height;
   engine.Free;
-  engine := TEngine.Create;
+  sceneSelector1.enabled := false;
+  cmdRender.enabled := false;
+  cmdSave.enabled := false;
+  StopRenderBtn.enabled := true;
+  engine := TEngine.Create(sceneSelector1.ItemIndex);
   engine.Render(self.Handle, imgRender.Width, imgRender.Height, strtoint(strSampleCount.Text), strtoint(strThreadCount.Text));
 END;
 
@@ -121,5 +125,13 @@ BEGIN
   Left           := 10;
   Top            := 10;
 END;
+
+procedure Tmainform.StopRenderBtnClick(Sender: TObject);
+begin
+  engine.Free;
+  sceneSelector1.enabled := true;
+  cmdRender.enabled := true;
+  StopRenderBtn.enabled := false;
+end;
 
 END.
